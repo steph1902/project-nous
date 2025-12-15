@@ -1,0 +1,108 @@
+:root {
+  /* Colors */
+  --color-bg: #0B1020;
+  --color-bg-secondary: #0D1428;
+  --color-panel: #111833;
+  --color-panel-hover: #18214A;
+  --color-text: #E8EEFF;
+  --color-text-secondary: #A9B4D0;
+  --color-text-muted: #6B7394;
+  --color-primary: #6D5EF7;
+  --color-primary-hover: #7D6FFF;
+  --color-primary-muted: rgba(109, 94, 247, 0.2);
+  --color-success: #2ECC71;
+  --color-warning: #F5A524;
+  --color-danger: #FF5C77;
+  --color-border: rgba(255, 255, 255, 0.10);
+  --color-border-hover: rgba(255, 255, 255, 0.20);
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Spacing */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-panel-hover);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-primary-muted);
+  color: var(--color-text);
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Code blocks */
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--color-panel);
+  padding: 0.125em 0.375em;
+  border-radius: var(--radius-sm);
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  background: var(--color-panel);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+}
