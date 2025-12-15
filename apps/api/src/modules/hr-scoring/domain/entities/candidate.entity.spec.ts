@@ -15,6 +15,7 @@ describe('HrCandidateEntity', () => {
             expect(candidate.name).toBe('Alice Johnson');
             expect(candidate.emailHash).toBeDefined();
             expect(candidate.emailHash).not.toBe('alice@example.com');
+            expect(candidate.meta).toEqual({});
         });
 
         it('should hash email consistently', () => {

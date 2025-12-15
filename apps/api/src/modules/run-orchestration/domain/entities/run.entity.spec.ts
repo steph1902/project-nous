@@ -1,4 +1,4 @@
-import { RunEntity, RunStatus } from './run.entity';
+import { RunEntity } from './run.entity';
 
 describe('RunEntity', () => {
     describe('create', () => {
@@ -11,33 +11,32 @@ describe('RunEntity', () => {
             });
 
             expect(run.id).toBe('run_123');
-            expect(run.status).toBe(RunStatus.QUEUED);
+            expect(run.status).toBe('QUEUED');
             expect(run.startedAt).toBeInstanceOf(Date);
             expect(run.finishedAt).toBeNull();
         });
 
-        it('should accept optional idempotency key', () => {
+        it('should accept optional inputJson', () => {
             const run = RunEntity.create({
                 id: 'run_123',
                 orgId: 'org_456',
                 workflowVersionId: 'wfv_789',
                 initiatedBy: 'usr_abc',
-                idempotencyKey: 'idem_xyz',
+                inputJson: { key: 'value' },
             });
 
-            expect(run.idempotencyKey).toBe('idem_xyz');
+            expect(run.inputJson).toEqual({ key: 'value' });
         });
 
-        it('should accept optional input', () => {
+        it('should default inputJson to empty object', () => {
             const run = RunEntity.create({
                 id: 'run_123',
                 orgId: 'org_456',
                 workflowVersionId: 'wfv_789',
                 initiatedBy: 'usr_abc',
-                input: { key: 'value' },
             });
 
-            expect(run.input).toEqual({ key: 'value' });
+            expect(run.inputJson).toEqual({});
         });
     });
 
@@ -52,7 +51,7 @@ describe('RunEntity', () => {
 
             const running = run.start();
 
-            expect(running.status).toBe(RunStatus.RUNNING);
+            expect(running.status).toBe('RUNNING');
         });
 
         it('should transition from RUNNING to SUCCEEDED', () => {
@@ -65,9 +64,9 @@ describe('RunEntity', () => {
 
             const succeeded = run.start().succeed({ result: 'ok' });
 
-            expect(succeeded.status).toBe(RunStatus.SUCCEEDED);
+            expect(succeeded.status).toBe('SUCCEEDED');
             expect(succeeded.finishedAt).toBeInstanceOf(Date);
-            expect(succeeded.output).toEqual({ result: 'ok' });
+            expect(succeeded.outputJson).toEqual({ result: 'ok' });
         });
 
         it('should transition from RUNNING to FAILED', () => {
@@ -78,14 +77,13 @@ describe('RunEntity', () => {
                 initiatedBy: 'usr_abc',
             });
 
-            const failed = run.start().fail({ error: 'Something went wrong' });
+            const failed = run.start().fail();
 
-            expect(failed.status).toBe(RunStatus.FAILED);
+            expect(failed.status).toBe('FAILED');
             expect(failed.finishedAt).toBeInstanceOf(Date);
-            expect(failed.error).toEqual({ error: 'Something went wrong' });
         });
 
-        it('should transition to CANCELED from non-terminal state', () => {
+        it('should transition to CANCELED from QUEUED', () => {
             const run = RunEntity.create({
                 id: 'run_123',
                 orgId: 'org_456',
@@ -95,11 +93,11 @@ describe('RunEntity', () => {
 
             const canceled = run.cancel();
 
-            expect(canceled.status).toBe(RunStatus.CANCELED);
+            expect(canceled.status).toBe('CANCELED');
             expect(canceled.finishedAt).toBeInstanceOf(Date);
         });
 
-        it('should throw error when canceling from terminal state', () => {
+        it('should throw error when transitioning from terminal state', () => {
             const run = RunEntity.create({
                 id: 'run_123',
                 orgId: 'org_456',
@@ -109,7 +107,7 @@ describe('RunEntity', () => {
 
             const succeeded = run.start().succeed({});
 
-            expect(() => succeeded.cancel()).toThrow('Cannot transition');
+            expect(() => succeeded.cancel()).toThrow('Invalid run state transition');
         });
     });
 
@@ -134,6 +132,32 @@ describe('RunEntity', () => {
             });
 
             expect(run.start().succeed({}).isTerminal()).toBe(true);
+        });
+    });
+
+    describe('getDurationMs', () => {
+        it('should return null for running job', () => {
+            const run = RunEntity.create({
+                id: 'run_123',
+                orgId: 'org_456',
+                workflowVersionId: 'wfv_789',
+                initiatedBy: 'usr_abc',
+            });
+
+            expect(run.getDurationMs()).toBeNull();
+        });
+
+        it('should return duration for finished job', () => {
+            const run = RunEntity.create({
+                id: 'run_123',
+                orgId: 'org_456',
+                workflowVersionId: 'wfv_789',
+                initiatedBy: 'usr_abc',
+            });
+
+            const finished = run.start().succeed({});
+
+            expect(finished.getDurationMs()).toBeGreaterThanOrEqual(0);
         });
     });
 });

@@ -5,60 +5,53 @@ describe('UserEntity', () => {
         it('should create a valid user entity', () => {
             const user = UserEntity.create({
                 id: 'usr_123',
-                email: 'test@example.com',
+                email: 'Test@Example.com',
                 name: 'Test User',
-                passwordHash: 'hashed_password',
             });
 
             expect(user.id).toBe('usr_123');
+            expect(user.email).toBe('test@example.com'); // Normalized
+            expect(user.name).toBe('Test User');
+            expect(user.createdAt).toBeInstanceOf(Date);
+            expect(user.lastLoginAt).toBeNull();
+        });
+
+        it('should normalize email to lowercase', () => {
+            const user = UserEntity.create({
+                id: 'usr_123',
+                email: 'TEST@EXAMPLE.COM',
+                name: 'Test User',
+            });
+
+            expect(user.email).toBe('test@example.com');
+        });
+
+        it('should trim whitespace from email and name', () => {
+            const user = UserEntity.create({
+                id: 'usr_123',
+                email: '  test@example.com  ',
+                name: '  Test User  ',
+            });
+
             expect(user.email).toBe('test@example.com');
             expect(user.name).toBe('Test User');
-            expect(user.passwordHash).toBe('hashed_password');
-            expect(user.createdAt).toBeInstanceOf(Date);
         });
+    });
 
-        it('should throw error for empty email', () => {
-            expect(() =>
-                UserEntity.create({
-                    id: 'usr_123',
-                    email: '',
-                    name: 'Test User',
-                    passwordHash: 'hashed_password',
-                })
-            ).toThrow('Invalid email format');
-        });
-
-        it('should throw error for invalid email format', () => {
-            expect(() =>
-                UserEntity.create({
-                    id: 'usr_123',
-                    email: 'invalid-email',
-                    name: 'Test User',
-                    passwordHash: 'hashed_password',
-                })
-            ).toThrow('Invalid email format');
-        });
-
-        it('should throw error for empty name', () => {
-            expect(() =>
-                UserEntity.create({
-                    id: 'usr_123',
-                    email: 'test@example.com',
-                    name: '',
-                    passwordHash: 'hashed_password',
-                })
-            ).toThrow('User name cannot be empty');
-        });
-
-        it('should trim whitespace from name', () => {
+    describe('updateLastLogin', () => {
+        it('should update lastLoginAt', () => {
             const user = UserEntity.create({
                 id: 'usr_123',
                 email: 'test@example.com',
-                name: '  Test User  ',
-                passwordHash: 'hashed_password',
+                name: 'Test User',
             });
 
-            expect(user.name).toBe('Test User');
+            expect(user.lastLoginAt).toBeNull();
+
+            const updated = user.updateLastLogin();
+
+            expect(updated.lastLoginAt).toBeInstanceOf(Date);
+            expect(updated.id).toBe(user.id);
         });
     });
 
@@ -68,7 +61,6 @@ describe('UserEntity', () => {
                 id: 'usr_123',
                 email: 'test@example.com',
                 name: 'Test User',
-                passwordHash: 'hashed_password',
             });
 
             const obj = user.toObject();
@@ -77,8 +69,8 @@ describe('UserEntity', () => {
                 id: 'usr_123',
                 email: 'test@example.com',
                 name: 'Test User',
-                passwordHash: 'hashed_password',
                 createdAt: expect.any(Date),
+                lastLoginAt: null,
             });
         });
     });

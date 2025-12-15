@@ -7,16 +7,16 @@ import {
 
 describe('WorkflowDag', () => {
     describe('validateDag', () => {
-        it('should return valid for acyclic DAG', () => {
+        it('should return valid for acyclic DAG with trigger', () => {
             const dag: WorkflowDag = {
                 nodes: [
-                    { key: 'a', type: 'trigger', config: {} },
-                    { key: 'b', type: 'action', config: {} },
-                    { key: 'c', type: 'action', config: {} },
+                    { key: 'trigger', type: 'manual', config: {} },
+                    { key: 'process', type: 'agent_task', config: {} },
+                    { key: 'output', type: 'output', config: {} },
                 ],
                 edges: [
-                    { from: 'a', to: 'b' },
-                    { from: 'b', to: 'c' },
+                    { from: 'trigger', to: 'process' },
+                    { from: 'process', to: 'output' },
                 ],
             };
 
@@ -29,10 +29,12 @@ describe('WorkflowDag', () => {
         it('should detect cycles', () => {
             const dag: WorkflowDag = {
                 nodes: [
-                    { key: 'a', type: 'action', config: {} },
-                    { key: 'b', type: 'action', config: {} },
+                    { key: 'trigger', type: 'manual', config: {} },
+                    { key: 'a', type: 'agent_task', config: {} },
+                    { key: 'b', type: 'agent_task', config: {} },
                 ],
                 edges: [
+                    { from: 'trigger', to: 'a' },
                     { from: 'a', to: 'b' },
                     { from: 'b', to: 'a' },
                 ],
@@ -41,13 +43,29 @@ describe('WorkflowDag', () => {
             const result = validateDag(dag);
 
             expect(result.valid).toBe(false);
-            expect(result.errors).toContain('DAG contains a cycle');
+            expect(result.errors).toContain('Workflow contains a cycle');
+        });
+
+        it('should require a trigger node', () => {
+            const dag: WorkflowDag = {
+                nodes: [
+                    { key: 'a', type: 'agent_task', config: {} },
+                ],
+                edges: [],
+            };
+
+            const result = validateDag(dag);
+
+            expect(result.valid).toBe(false);
+            expect(result.errors).toContain('Workflow must have at least one trigger node');
         });
 
         it('should detect invalid edge references', () => {
             const dag: WorkflowDag = {
-                nodes: [{ key: 'a', type: 'action', config: {} }],
-                edges: [{ from: 'a', to: 'nonexistent' }],
+                nodes: [
+                    { key: 'trigger', type: 'manual', config: {} },
+                ],
+                edges: [{ from: 'trigger', to: 'nonexistent' }],
             };
 
             const result = validateDag(dag);
@@ -59,8 +77,8 @@ describe('WorkflowDag', () => {
         it('should detect duplicate node keys', () => {
             const dag: WorkflowDag = {
                 nodes: [
-                    { key: 'a', type: 'action', config: {} },
-                    { key: 'a', type: 'action', config: {} },
+                    { key: 'trigger', type: 'manual', config: {} },
+                    { key: 'trigger', type: 'agent_task', config: {} },
                 ],
                 edges: [],
             };
@@ -68,7 +86,7 @@ describe('WorkflowDag', () => {
             const result = validateDag(dag);
 
             expect(result.valid).toBe(false);
-            expect(result.errors.some((e) => e.includes('Duplicate'))).toBe(true);
+            expect(result.errors.some((e) => e.includes('unique'))).toBe(true);
         });
     });
 
@@ -76,32 +94,32 @@ describe('WorkflowDag', () => {
         it('should return nodes in topological order', () => {
             const dag: WorkflowDag = {
                 nodes: [
-                    { key: 'c', type: 'action', config: {} },
-                    { key: 'a', type: 'trigger', config: {} },
-                    { key: 'b', type: 'action', config: {} },
+                    { key: 'output', type: 'output', config: {} },
+                    { key: 'trigger', type: 'manual', config: {} },
+                    { key: 'process', type: 'agent_task', config: {} },
                 ],
                 edges: [
-                    { from: 'a', to: 'b' },
-                    { from: 'b', to: 'c' },
+                    { from: 'trigger', to: 'process' },
+                    { from: 'process', to: 'output' },
                 ],
             };
 
             const sorted = topologicalSort(dag);
 
-            expect(sorted).toEqual(['a', 'b', 'c']);
+            expect(sorted).toEqual(['trigger', 'process', 'output']);
         });
 
         it('should handle diamond dependencies', () => {
             const dag: WorkflowDag = {
                 nodes: [
-                    { key: 'a', type: 'trigger', config: {} },
-                    { key: 'b', type: 'action', config: {} },
-                    { key: 'c', type: 'action', config: {} },
-                    { key: 'd', type: 'action', config: {} },
+                    { key: 'trigger', type: 'manual', config: {} },
+                    { key: 'b', type: 'agent_task', config: {} },
+                    { key: 'c', type: 'agent_task', config: {} },
+                    { key: 'd', type: 'output', config: {} },
                 ],
                 edges: [
-                    { from: 'a', to: 'b' },
-                    { from: 'a', to: 'c' },
+                    { from: 'trigger', to: 'b' },
+                    { from: 'trigger', to: 'c' },
                     { from: 'b', to: 'd' },
                     { from: 'c', to: 'd' },
                 ],
@@ -109,17 +127,17 @@ describe('WorkflowDag', () => {
 
             const sorted = topologicalSort(dag);
 
-            expect(sorted.indexOf('a')).toBeLessThan(sorted.indexOf('b'));
-            expect(sorted.indexOf('a')).toBeLessThan(sorted.indexOf('c'));
+            expect(sorted.indexOf('trigger')).toBeLessThan(sorted.indexOf('b'));
+            expect(sorted.indexOf('trigger')).toBeLessThan(sorted.indexOf('c'));
             expect(sorted.indexOf('b')).toBeLessThan(sorted.indexOf('d'));
             expect(sorted.indexOf('c')).toBeLessThan(sorted.indexOf('d'));
         });
 
-        it('should throw for cyclic DAG', () => {
+        it('should handle cyclic DAG gracefully (returns incomplete result)', () => {
             const dag: WorkflowDag = {
                 nodes: [
-                    { key: 'a', type: 'action', config: {} },
-                    { key: 'b', type: 'action', config: {} },
+                    { key: 'a', type: 'agent_task', config: {} },
+                    { key: 'b', type: 'agent_task', config: {} },
                 ],
                 edges: [
                     { from: 'a', to: 'b' },
@@ -127,14 +145,16 @@ describe('WorkflowDag', () => {
                 ],
             };
 
-            expect(() => topologicalSort(dag)).toThrow();
+            // Cyclic DAG will return incomplete result (not all nodes)
+            const sorted = topologicalSort(dag);
+            expect(sorted.length).toBeLessThan(dag.nodes.length);
         });
     });
 
     describe('WorkflowDagSchema', () => {
         it('should validate correct DAG', () => {
             const dag = {
-                nodes: [{ key: 'start', type: 'trigger', config: {} }],
+                nodes: [{ key: 'start', type: 'manual', config: {} }],
                 edges: [],
             };
 

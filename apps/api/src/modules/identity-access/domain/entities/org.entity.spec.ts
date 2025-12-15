@@ -6,12 +6,10 @@ describe('OrgEntity', () => {
             const org = OrgEntity.create({
                 id: 'org_123',
                 name: 'Acme Corp',
-                ownerId: 'usr_456',
             });
 
             expect(org.id).toBe('org_123');
             expect(org.name).toBe('Acme Corp');
-            expect(org.ownerId).toBe('usr_456');
             expect(org.createdAt).toBeInstanceOf(Date);
         });
 
@@ -20,7 +18,6 @@ describe('OrgEntity', () => {
                 OrgEntity.create({
                     id: 'org_123',
                     name: '',
-                    ownerId: 'usr_456',
                 })
             ).toThrow('Organization name cannot be empty');
         });
@@ -30,7 +27,6 @@ describe('OrgEntity', () => {
                 OrgEntity.create({
                     id: 'org_123',
                     name: '   ',
-                    ownerId: 'usr_456',
                 })
             ).toThrow('Organization name cannot be empty');
         });
@@ -39,7 +35,6 @@ describe('OrgEntity', () => {
             const org = OrgEntity.create({
                 id: 'org_123',
                 name: '  Acme Corp  ',
-                ownerId: 'usr_456',
             });
 
             expect(org.name).toBe('Acme Corp');
@@ -51,24 +46,33 @@ describe('OrgEntity', () => {
             const org = OrgEntity.create({
                 id: 'org_123',
                 name: 'Old Name',
-                ownerId: 'usr_456',
             });
 
             const renamed = org.rename('New Name');
 
             expect(renamed.name).toBe('New Name');
             expect(renamed.id).toBe(org.id);
-            expect(renamed.ownerId).toBe(org.ownerId);
+            expect(renamed.createdAt).toBe(org.createdAt);
         });
 
         it('should throw error for empty new name', () => {
             const org = OrgEntity.create({
                 id: 'org_123',
                 name: 'Old Name',
-                ownerId: 'usr_456',
             });
 
             expect(() => org.rename('')).toThrow('Organization name cannot be empty');
+        });
+
+        it('should trim whitespace from new name', () => {
+            const org = OrgEntity.create({
+                id: 'org_123',
+                name: 'Old Name',
+            });
+
+            const renamed = org.rename('  New Name  ');
+
+            expect(renamed.name).toBe('New Name');
         });
     });
 
@@ -77,7 +81,6 @@ describe('OrgEntity', () => {
             const org = OrgEntity.create({
                 id: 'org_123',
                 name: 'Acme Corp',
-                ownerId: 'usr_456',
             });
 
             const obj = org.toObject();
@@ -85,7 +88,6 @@ describe('OrgEntity', () => {
             expect(obj).toEqual({
                 id: 'org_123',
                 name: 'Acme Corp',
-                ownerId: 'usr_456',
                 createdAt: expect.any(Date),
             });
         });

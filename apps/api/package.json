@@ -82,7 +82,7 @@
         "testEnvironment": "node",
         "moduleNameMapper": {
             "^@/(.*)$": "<rootDir>/$1",
-            "^@nous/shared$": "<rootDir>/../../packages/shared/src"
+            "^@nous/shared$": "<rootDir>/../../../packages/shared/src"
         }
     }
 }

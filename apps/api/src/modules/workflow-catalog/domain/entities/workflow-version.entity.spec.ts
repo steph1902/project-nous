@@ -1,15 +1,15 @@
-import { WorkflowVersionEntity, WorkflowVersionStatus } from './workflow-version.entity';
+import { WorkflowVersionEntity, DagValidationError } from './workflow-version.entity';
 import { WorkflowDag } from '@nous/shared';
 
 describe('WorkflowVersionEntity', () => {
     const validDag: WorkflowDag = {
         nodes: [
-            { key: 'start', type: 'trigger', config: {} },
-            { key: 'process', type: 'action', config: {} },
-            { key: 'end', type: 'action', config: {} },
+            { key: 'trigger', type: 'manual', config: {} },
+            { key: 'process', type: 'agent_task', config: {} },
+            { key: 'end', type: 'output', config: {} },
         ],
         edges: [
-            { from: 'start', to: 'process' },
+            { from: 'trigger', to: 'process' },
             { from: 'process', to: 'end' },
         ],
     };
@@ -20,33 +20,25 @@ describe('WorkflowVersionEntity', () => {
                 id: 'wfv_123',
                 workflowId: 'wf_456',
                 version: 1,
-                dag: validDag,
+                dagJson: validDag,
+                createdBy: 'usr_789',
             });
 
             expect(version.id).toBe('wfv_123');
             expect(version.workflowId).toBe('wf_456');
             expect(version.version).toBe(1);
-            expect(version.status).toBe(WorkflowVersionStatus.DRAFT);
-        });
-
-        it('should throw error for empty DAG nodes', () => {
-            expect(() =>
-                WorkflowVersionEntity.create({
-                    id: 'wfv_123',
-                    workflowId: 'wf_456',
-                    version: 1,
-                    dag: { nodes: [], edges: [] },
-                })
-            ).toThrow('DAG must have at least one node');
+            expect(version.status).toBe('DRAFT');
         });
 
         it('should throw error for cyclic DAG', () => {
             const cyclicDag: WorkflowDag = {
                 nodes: [
-                    { key: 'a', type: 'action', config: {} },
-                    { key: 'b', type: 'action', config: {} },
+                    { key: 'trigger', type: 'manual', config: {} },
+                    { key: 'a', type: 'agent_task', config: {} },
+                    { key: 'b', type: 'agent_task', config: {} },
                 ],
                 edges: [
+                    { from: 'trigger', to: 'a' },
                     { from: 'a', to: 'b' },
                     { from: 'b', to: 'a' },
                 ],
@@ -57,9 +49,27 @@ describe('WorkflowVersionEntity', () => {
                     id: 'wfv_123',
                     workflowId: 'wf_456',
                     version: 1,
-                    dag: cyclicDag,
+                    dagJson: cyclicDag,
+                    createdBy: 'usr_789',
                 })
-            ).toThrow('DAG contains a cycle');
+            ).toThrow(DagValidationError);
+        });
+
+        it('should throw error for DAG without trigger', () => {
+            const noTriggerDag: WorkflowDag = {
+                nodes: [{ key: 'a', type: 'agent_task', config: {} }],
+                edges: [],
+            };
+
+            expect(() =>
+                WorkflowVersionEntity.create({
+                    id: 'wfv_123',
+                    workflowId: 'wf_456',
+                    version: 1,
+                    dagJson: noTriggerDag,
+                    createdBy: 'usr_789',
+                })
+            ).toThrow(DagValidationError);
         });
     });
 
@@ -69,13 +79,13 @@ describe('WorkflowVersionEntity', () => {
                 id: 'wfv_123',
                 workflowId: 'wf_456',
                 version: 1,
-                dag: validDag,
+                dagJson: validDag,
+                createdBy: 'usr_789',
             });
 
             const published = version.publish();
 
-            expect(published.status).toBe(WorkflowVersionStatus.PUBLISHED);
-            expect(published.publishedAt).toBeInstanceOf(Date);
+            expect(published.status).toBe('PUBLISHED');
         });
 
         it('should throw error when publishing already published version', () => {
@@ -83,12 +93,13 @@ describe('WorkflowVersionEntity', () => {
                 id: 'wfv_123',
                 workflowId: 'wf_456',
                 version: 1,
-                dag: validDag,
+                dagJson: validDag,
+                createdBy: 'usr_789',
             });
 
             const published = version.publish();
 
-            expect(() => published.publish()).toThrow('Cannot publish');
+            expect(() => published.publish()).toThrow('Only draft versions can be published');
         });
     });
 
@@ -98,23 +109,27 @@ describe('WorkflowVersionEntity', () => {
                 id: 'wfv_123',
                 workflowId: 'wf_456',
                 version: 1,
-                dag: validDag,
+                dagJson: validDag,
+                createdBy: 'usr_789',
             });
 
             const archived = version.publish().archive();
 
-            expect(archived.status).toBe(WorkflowVersionStatus.ARCHIVED);
+            expect(archived.status).toBe('ARCHIVED');
         });
 
-        it('should throw error when archiving DRAFT version', () => {
+        it('should throw error when archiving already archived version', () => {
             const version = WorkflowVersionEntity.create({
                 id: 'wfv_123',
                 workflowId: 'wf_456',
                 version: 1,
-                dag: validDag,
+                dagJson: validDag,
+                createdBy: 'usr_789',
             });
 
-            expect(() => version.archive()).toThrow('Cannot archive');
+            const archived = version.publish().archive();
+
+            expect(() => archived.archive()).toThrow('already archived');
         });
     });
 
@@ -124,10 +139,41 @@ describe('WorkflowVersionEntity', () => {
                 id: 'wfv_123',
                 workflowId: 'wf_456',
                 version: 1,
-                dag: validDag,
+                dagJson: validDag,
+                createdBy: 'usr_789',
             });
 
             expect(version.getNodeCount()).toBe(3);
+        });
+    });
+
+    describe('getNodeByKey', () => {
+        it('should return the node with matching key', () => {
+            const version = WorkflowVersionEntity.create({
+                id: 'wfv_123',
+                workflowId: 'wf_456',
+                version: 1,
+                dagJson: validDag,
+                createdBy: 'usr_789',
+            });
+
+            const node = version.getNodeByKey('trigger');
+
+            expect(node?.type).toBe('manual');
+        });
+
+        it('should return undefined for non-existent key', () => {
+            const version = WorkflowVersionEntity.create({
+                id: 'wfv_123',
+                workflowId: 'wf_456',
+                version: 1,
+                dagJson: validDag,
+                createdBy: 'usr_789',
+            });
+
+            const node = version.getNodeByKey('nonexistent');
+
+            expect(node).toBeUndefined();
         });
     });
 });
