@@ -1,0 +1,20 @@
+export declare function generateUserId(): string;
+export declare function generateOrgId(): string;
+export declare function generateWorkflowId(): string;
+export declare function generateWorkflowVersionId(): string;
+export declare function generateRunId(): string;
+export declare function generateRunNodeId(): string;
+export declare function generateArtifactId(): string;
+export declare function generateIntegrationId(): string;
+export declare function generateApiKeyId(): string;
+export declare function generateKbDocumentId(): string;
+export declare function generateKbChunkId(): string;
+export declare function generateCandidateId(): string;
+export declare function generateSubmissionId(): string;
+export declare function generateAuditEventId(): string;
+export declare function generatePromptTemplateId(): string;
+export declare function generateIdempotencyId(): string;
+export declare function generateRequestId(): string;
+export declare function parseIdPrefix(id: string): string | null;
+export declare function validateIdPrefix(id: string, expectedPrefix: string): boolean;
+//# sourceMappingURL=ids.d.ts.map
