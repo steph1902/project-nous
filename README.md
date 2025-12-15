@@ -1,54 +1,68 @@
 # Nous (νοῦς)
 
-**The Mind Behind the Workflow**
+> *"In Anaxagoras and Aristotle, νοῦς is the cosmic mind that orders the universe."*
 
-*"Reason in Motion"*
+**The Mind Behind the Workflow** — Enterprise-grade AI Agent Workflow Orchestrator with Multi-Agent collaboration, RAG knowledge bases, and intelligent HR scoring.
 
-![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)
-![Next.js](https://img.shields.io/badge/Next.js-14-black)
-![NestJS](https://img.shields.io/badge/NestJS-10-red)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
+## 🎯 Project Status
 
-> In Anaxagoras and Aristotle, νοῦς is the cosmic mind that orders the universe. In Plotinus, it's the divine intellect from which all rational structure emanates. Nous is literally a "mind" that reasons over knowledge, orchestrates action, and brings order to chaos.
+| Component | Status | Notes |
+|-----------|--------|-------|
+| **Backend API** | ✅ Complete | 8 modules, 25+ endpoints |
+| **Frontend UI** | ✅ Complete | 7 pages, responsive design |
+| **Database Schema** | ✅ Complete | 20+ Prisma models |
+| **Unit Tests** | ✅ Passing | 92 tests across all modules |
+| **CI/CD Pipeline** | ✅ Complete | GitHub Actions |
+| **Docker Setup** | ✅ Complete | PostgreSQL + Redis + MinIO |
 
-**Nous** is an enterprise-grade AI Agent Workflow Orchestrator with Multi-Agent collaboration, RAG knowledge bases, and intelligent HR scoring.
+### What's Working ✅
 
-## 🚀 Features
+- **Backend Modules** — All 8 modules implemented with DDD architecture
+- **API Endpoints** — All routes defined with Swagger documentation
+- **Domain Logic** — Entities, use cases, and repositories complete
+- **Database Schema** — Full Prisma schema with seed data
+- **Frontend Pages** — All dashboard pages with mock data
+- **Unit Tests** — 92 tests covering domain entities
 
-- **🔄 Workflow Orchestration**: DAG-based workflow builder with automatic retries, idempotency, and parallel execution
-- **🧠 RAG Knowledge Base**: Document ingestion, embeddings with pgvector, and Q&A with citations
-- **👥 HR Scoring**: Automated candidate scoring with customizable rubrics and explainable AI
-- **🔌 Tool Integrations**: Slack, Gmail, Sheets, HTTP with scoped permissions
-- **📊 Observability**: Structured logging, audit trails, and run monitoring
-- **🔐 Enterprise Security**: RBAC, API keys, encrypted secrets, and multi-tenancy
+### What Needs Integration 🔧
 
-## 📦 Tech Stack
+| Feature | Status | What's Needed |
+|---------|--------|---------------|
+| **Database Connection** | 🔧 Needs Docker | Run `docker-compose up -d` then migrate |
+| **OpenAI Integration** | 🔧 Needs API Key | Add `OPENAI_API_KEY` to `.env.local` |
+| **Redis/BullMQ** | 🔧 Needs Docker | Queue workers need Redis running |
+| **MinIO/S3** | 🔧 Needs Docker | Document storage needs MinIO running |
+| **Frontend ↔ API** | 🔧 Needs Auth | Connect React pages to real API endpoints |
+| **E2E Tests** | ❌ Not Started | Integration and end-to-end tests |
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 14, React 18, CSS Variables |
-| Backend | NestJS 10, TypeScript 5.3 |
-| Database | PostgreSQL 16 + pgvector |
-| Queue | BullMQ + Redis |
-| Storage | S3 / MinIO |
-| LLM | OpenAI / Gemini (adapter pattern) |
+---
 
-## 🏗️ Project Structure
+## 🏗️ Architecture
 
 ```
 nous/
 ├── apps/
-│   ├── api/          # NestJS backend API
-│   ├── web/          # Next.js frontend
-│   └── workers/      # BullMQ job processors
+│   ├── api/                    # NestJS Backend
+│   │   └── src/modules/
+│   │       ├── identity-access/    # Auth, RBAC, API Keys
+│   │       ├── workflow-catalog/   # DAG definitions
+│   │       ├── run-orchestration/  # Execution engine
+│   │       ├── knowledge-base/     # RAG system
+│   │       ├── hr-scoring/         # AI candidate eval
+│   │       ├── tool-integrations/  # External services
+│   │       ├── observability/      # Audit, monitoring
+│   │       └── health/             # Health checks
+│   ├── web/                    # Next.js Frontend
+│   └── workers/                # BullMQ Processors
 ├── packages/
-│   ├── shared/       # Shared types, schemas, utilities
-│   └── ui/           # Design system components
-├── docker-compose.yml
-└── turbo.json
+│   ├── shared/                 # Types, Schemas, Utils
+│   └── ui/                     # Design System
+└── docker-compose.yml
 ```
 
-## 🛠️ Quick Start
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
@@ -56,47 +70,110 @@ nous/
 - pnpm 8+
 - Docker & Docker Compose
 
-### Setup
+### 1. Clone & Install
 
-1. **Clone and install dependencies**
-   ```bash
-   git clone https://github.com/steph1902/project-nous.git
-   cd project-nous
-   pnpm install
-   ```
+```bash
+git clone https://github.com/steph1902/project-nous.git
+cd project-nous
+pnpm install
+```
 
-2. **Start infrastructure**
-   ```bash
-   pnpm dev:infra
-   ```
-   This starts PostgreSQL (with pgvector), Redis, and MinIO.
+### 2. Start Infrastructure
 
-3. **Configure environment**
-   ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your API keys
-   ```
+```bash
+docker-compose up -d
+```
 
-4. **Run database migrations**
-   ```bash
-   pnpm db:migrate:dev
-   pnpm db:seed
-   ```
+This starts:
+- **PostgreSQL 16** with pgvector extension (port 5432)
+- **Redis 7** for job queues (port 6379)
+- **MinIO** for document storage (port 9000)
 
-5. **Start development servers**
-   ```bash
-   pnpm dev
-   ```
+### 3. Configure Environment
 
-   - Web: http://localhost:3000
-   - API: http://localhost:3001
-   - API Docs: http://localhost:3001/docs
+```bash
+cp .env.example .env.local
+```
 
-## 📚 Documentation
+Edit `.env.local`:
+```env
+DATABASE_URL=postgresql://nous:nous@localhost:5432/nous
+REDIS_URL=redis://localhost:6379
+OPENAI_API_KEY=sk-your-key-here
+JWT_SECRET=your-secret-key-32-chars
+ENCRYPTION_KEY=your-encryption-key-32-chars
+```
 
-- [Architecture](./docs/ARCHITECTURE.md)
-- [API Reference](http://localhost:3001/docs)
-- [Contributing](./docs/CONTRIBUTING.md)
+### 4. Setup Database
+
+```bash
+cd apps/api
+npx prisma migrate dev
+npx prisma db seed
+```
+
+### 5. Start Development
+
+```bash
+cd ../..
+pnpm dev
+```
+
+**URLs:**
+- Web: http://localhost:3000
+- API: http://localhost:3001/api
+- Swagger: http://localhost:3001/docs
+
+**Demo Login:**
+- Email: `demo@nous.ai`
+- Password: `demo1234`
+
+---
+
+## 🧩 Backend Modules
+
+### 1. Identity & Access Management
+- User registration and JWT authentication
+- Organization management with multi-tenancy
+- RBAC with role hierarchy (Owner > Admin > Operator > Viewer)
+- API key generation with scoped permissions
+
+### 2. Workflow Catalog
+- DAG-based workflow definitions
+- Version management (Draft → Published → Archived)
+- Cycle detection and validation
+- Trigger types: Manual, Webhook, Schedule
+
+### 3. Run Orchestration
+- State machine execution (Queued → Running → Succeeded/Failed)
+- Idempotency key support
+- BullMQ job queue integration
+- Retry with exponential backoff
+
+### 4. Knowledge Base (RAG)
+- Document ingestion (PDF, Markdown, HTML)
+- Text chunking with configurable overlap
+- OpenAI embeddings (text-embedding-3-small)
+- Vector search with pgvector
+
+### 5. HR Scoring
+- Candidate management with email privacy (hashing)
+- AI scoring with GPT-4o
+- Category scores: Experience, Skills, Communication, Culture Fit
+- Red flag detection and rankings
+
+### 6. Tool Integrations
+- HTTP adapter for external APIs
+- Slack adapter for messaging
+- AES-256-GCM encrypted secrets
+- Scoped permission checking
+
+### 7. Observability
+- Audit event logging
+- SSE for real-time run monitoring
+- Query API with filtering
+
+---
 
 ## 🧪 Testing
 
@@ -104,26 +181,46 @@ nous/
 # Run all tests
 pnpm test
 
-# Run unit tests
-pnpm test:unit
-
-# Run integration tests
-pnpm test:integration
-
 # Run with coverage
-pnpm test -- --coverage
+pnpm test:cov
+
+# Shared package tests
+cd packages/shared && pnpm test
+
+# API tests
+cd apps/api && pnpm test
 ```
 
-## 🔑 Environment Variables
+**Current Coverage:** 92 tests passing
 
-See [.env.example](./.env.example) for all configuration options.
+---
 
-Key variables:
-- `DATABASE_URL` - PostgreSQL connection string
-- `REDIS_URL` - Redis connection string
-- `OPENAI_API_KEY` - OpenAI API key for LLM
-- `JWT_SECRET` - Secret for JWT signing
-- `ENCRYPTION_KEY` - Key for encrypting secrets
+## 📁 Key Files
+
+| File | Purpose |
+|------|---------|
+| `apps/api/prisma/schema.prisma` | Database schema |
+| `apps/api/prisma/seed.ts` | Demo data |
+| `packages/shared/src/schemas/` | Zod validation schemas |
+| `packages/shared/src/ids.ts` | ID generation utilities |
+| `.github/workflows/ci.yml` | CI/CD pipeline |
+
+---
+
+## 🔐 Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | ✅ | PostgreSQL connection |
+| `REDIS_URL` | ✅ | Redis connection |
+| `OPENAI_API_KEY` | ✅ | OpenAI for embeddings/scoring |
+| `JWT_SECRET` | ✅ | JWT signing (32+ chars) |
+| `ENCRYPTION_KEY` | ✅ | AES encryption (32+ chars) |
+| `MINIO_ENDPOINT` | ⚪ | MinIO/S3 endpoint |
+| `MINIO_ACCESS_KEY` | ⚪ | MinIO access key |
+| `MINIO_SECRET_KEY` | ⚪ | MinIO secret key |
+
+---
 
 ## 📝 License
 
