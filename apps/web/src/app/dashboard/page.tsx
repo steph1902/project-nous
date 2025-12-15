@@ -1,208 +1,158 @@
+'use client';
+
+import Link from 'next/link';
+
+// Mock data for dashboard
+const stats = {
+    workflows: 12,
+    runs: { total: 1245, running: 3, succeeded: 1180, failed: 62 },
+    documents: 45,
+    candidates: 89,
+};
+
+const recentRuns = [
+    { id: 'run_001', workflow: 'HR Candidate Scoring', status: 'SUCCEEDED', time: '2 min ago' },
+    { id: 'run_002', workflow: 'Document Ingestion', status: 'RUNNING', time: '5 min ago' },
+    { id: 'run_003', workflow: 'Email Triage', status: 'FAILED', time: '12 min ago' },
+];
+
+const statusColors: Record<string, string> = {
+    RUNNING: 'bg-blue-500/10 text-blue-400',
+    SUCCEEDED: 'bg-emerald-500/10 text-emerald-400',
+    FAILED: 'bg-red-500/10 text-red-400',
+};
+
 export default function DashboardPage() {
     return (
         <div>
-            {/* Header */}
-            <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                    Dashboard
-                </h1>
-                <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
-                    Overview of your agent workflows and runs
-                </p>
+            <div className="mb-8">
+                <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+                <p className="text-gray-400 mt-1">Welcome back! Here&apos;s an overview of your platform.</p>
             </div>
 
             {/* Stats Grid */}
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: '1rem',
-                    marginBottom: '2rem',
-                }}
-            >
-                <StatCard label="Total Workflows" value="12" trend="+2 this week" />
-                <StatCard label="Active Runs" value="3" trend="Running now" color="success" />
-                <StatCard label="KB Documents" value="48" trend="+5 this month" />
-                <StatCard label="Candidates Scored" value="156" trend="+23 this week" />
+            <div className="grid grid-cols-4 gap-6 mb-8">
+                <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:border-emerald-500/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-400 text-sm">Workflows</p>
+                            <p className="text-3xl font-bold text-white mt-1">{stats.workflows}</p>
+                        </div>
+                        <span className="text-3xl">🔄</span>
+                    </div>
+                    <Link href="/dashboard/workflows" className="text-emerald-400 text-sm hover:underline mt-3 block">
+                        View all →
+                    </Link>
+                </div>
+
+                <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:border-emerald-500/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-400 text-sm">Total Runs</p>
+                            <p className="text-3xl font-bold text-white mt-1">{stats.runs.total}</p>
+                        </div>
+                        <span className="text-3xl">▶️</span>
+                    </div>
+                    <div className="flex gap-3 mt-3 text-sm">
+                        <span className="text-emerald-400">{stats.runs.succeeded} ✓</span>
+                        <span className="text-blue-400">{stats.runs.running} ⟳</span>
+                        <span className="text-red-400">{stats.runs.failed} ✗</span>
+                    </div>
+                </div>
+
+                <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:border-emerald-500/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-400 text-sm">KB Documents</p>
+                            <p className="text-3xl font-bold text-white mt-1">{stats.documents}</p>
+                        </div>
+                        <span className="text-3xl">🧠</span>
+                    </div>
+                    <Link href="/dashboard/knowledge" className="text-emerald-400 text-sm hover:underline mt-3 block">
+                        Manage KB →
+                    </Link>
+                </div>
+
+                <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:border-emerald-500/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-400 text-sm">Candidates Scored</p>
+                            <p className="text-3xl font-bold text-white mt-1">{stats.candidates}</p>
+                        </div>
+                        <span className="text-3xl">👥</span>
+                    </div>
+                    <Link href="/dashboard/hr" className="text-emerald-400 text-sm hover:underline mt-3 block">
+                        View rankings →
+                    </Link>
+                </div>
             </div>
 
-            {/* Recent Activity */}
-            <div
-                style={{
-                    backgroundColor: 'var(--color-panel)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: '1.5rem',
-                }}
-            >
-                <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>
-                    Recent Runs
-                </h2>
+            {/* Recent Runs & Quick Actions */}
+            <div className="grid grid-cols-2 gap-6">
+                {/* Recent Runs */}
+                <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold text-white">Recent Runs</h2>
+                        <Link href="/dashboard/runs" className="text-emerald-400 text-sm hover:underline">
+                            View all
+                        </Link>
+                    </div>
+                    <div className="space-y-3">
+                        {recentRuns.map((run) => (
+                            <div
+                                key={run.id}
+                                className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg"
+                            >
+                                <div>
+                                    <p className="text-white">{run.workflow}</p>
+                                    <code className="text-emerald-400 text-xs">{run.id}</code>
+                                </div>
+                                <div className="text-right">
+                                    <span className={`px-2 py-1 rounded text-xs font-medium ${statusColors[run.status]}`}>
+                                        {run.status}
+                                    </span>
+                                    <p className="text-gray-400 text-xs mt-1">{run.time}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr
-                            style={{
-                                borderBottom: '1px solid var(--color-border)',
-                                textAlign: 'left',
-                            }}
+                {/* Quick Actions */}
+                <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+                    <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
+                    <div className="grid grid-cols-2 gap-3">
+                        <Link
+                            href="/dashboard/workflows/new"
+                            className="p-4 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg text-center transition-colors"
                         >
-                            <th style={{ padding: '0.75rem 1rem', color: 'var(--color-text-muted)', fontWeight: 500, fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                                Workflow
-                            </th>
-                            <th style={{ padding: '0.75rem 1rem', color: 'var(--color-text-muted)', fontWeight: 500, fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                                Status
-                            </th>
-                            <th style={{ padding: '0.75rem 1rem', color: 'var(--color-text-muted)', fontWeight: 500, fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                                Duration
-                            </th>
-                            <th style={{ padding: '0.75rem 1rem', color: 'var(--color-text-muted)', fontWeight: 500, fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                                Started
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <RunRow
-                            workflow="HR Candidate Scoring"
-                            status="succeeded"
-                            duration="12s"
-                            started="2 min ago"
-                        />
-                        <RunRow
-                            workflow="Weekly Report Generator"
-                            status="running"
-                            duration="--"
-                            started="5 min ago"
-                        />
-                        <RunRow
-                            workflow="HR Candidate Scoring"
-                            status="succeeded"
-                            duration="8s"
-                            started="1 hour ago"
-                        />
-                        <RunRow
-                            workflow="Document Ingestion"
-                            status="failed"
-                            duration="3s"
-                            started="2 hours ago"
-                        />
-                    </tbody>
-                </table>
+                            <span className="text-2xl block mb-2">➕</span>
+                            <span className="text-white text-sm">New Workflow</span>
+                        </Link>
+                        <Link
+                            href="/dashboard/knowledge"
+                            className="p-4 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg text-center transition-colors"
+                        >
+                            <span className="text-2xl block mb-2">📄</span>
+                            <span className="text-white text-sm">Upload Document</span>
+                        </Link>
+                        <Link
+                            href="/dashboard/hr"
+                            className="p-4 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg text-center transition-colors"
+                        >
+                            <span className="text-2xl block mb-2">👤</span>
+                            <span className="text-white text-sm">Add Candidate</span>
+                        </Link>
+                        <Link
+                            href="/dashboard/settings"
+                            className="p-4 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg text-center transition-colors"
+                        >
+                            <span className="text-2xl block mb-2">🔗</span>
+                            <span className="text-white text-sm">Connect Tool</span>
+                        </Link>
+                    </div>
+                </div>
             </div>
         </div>
-    );
-}
-
-function StatCard({
-    label,
-    value,
-    trend,
-    color = 'default',
-}: {
-    label: string;
-    value: string;
-    trend: string;
-    color?: 'default' | 'success' | 'warning' | 'danger';
-}) {
-    const colorMap = {
-        default: 'var(--color-text)',
-        success: 'var(--color-success)',
-        warning: 'var(--color-warning)',
-        danger: 'var(--color-danger)',
-    };
-
-    return (
-        <div
-            style={{
-                backgroundColor: 'var(--color-panel)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '1.25rem',
-            }}
-        >
-            <p
-                style={{
-                    color: 'var(--color-text-muted)',
-                    fontSize: '0.75rem',
-                    textTransform: 'uppercase',
-                    marginBottom: '0.5rem',
-                }}
-            >
-                {label}
-            </p>
-            <p
-                style={{
-                    fontSize: '2rem',
-                    fontWeight: 700,
-                    color: colorMap[color],
-                    marginBottom: '0.25rem',
-                }}
-            >
-                {value}
-            </p>
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
-                {trend}
-            </p>
-        </div>
-    );
-}
-
-function RunRow({
-    workflow,
-    status,
-    duration,
-    started,
-}: {
-    workflow: string;
-    status: 'succeeded' | 'running' | 'failed' | 'queued';
-    duration: string;
-    started: string;
-}) {
-    const statusColors = {
-        succeeded: { bg: 'rgba(46, 204, 113, 0.2)', text: 'var(--color-success)' },
-        running: { bg: 'rgba(52, 152, 219, 0.2)', text: '#3498DB' },
-        failed: { bg: 'rgba(255, 92, 119, 0.2)', text: 'var(--color-danger)' },
-        queued: { bg: 'rgba(255, 255, 255, 0.1)', text: 'var(--color-text-muted)' },
-    };
-
-    return (
-        <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-            <td style={{ padding: '0.75rem 1rem', fontSize: '0.875rem' }}>{workflow}</td>
-            <td style={{ padding: '0.75rem 1rem' }}>
-                <span
-                    style={{
-                        display: 'inline-block',
-                        padding: '0.25rem 0.625rem',
-                        borderRadius: '9999px',
-                        fontSize: '0.75rem',
-                        fontWeight: 500,
-                        backgroundColor: statusColors[status].bg,
-                        color: statusColors[status].text,
-                        textTransform: 'capitalize',
-                    }}
-                >
-                    {status}
-                </span>
-            </td>
-            <td
-                style={{
-                    padding: '0.75rem 1rem',
-                    fontSize: '0.875rem',
-                    fontFamily: 'var(--font-mono)',
-                    color: 'var(--color-text-secondary)',
-                }}
-            >
-                {duration}
-            </td>
-            <td
-                style={{
-                    padding: '0.75rem 1rem',
-                    fontSize: '0.875rem',
-                    color: 'var(--color-text-secondary)',
-                }}
-            >
-                {started}
-            </td>
-        </tr>
     );
 }

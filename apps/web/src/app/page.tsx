@@ -1,187 +1,153 @@
 import Link from 'next/link';
 
-export default function Home() {
+export default function HomePage() {
     return (
-        <main
-            style={{
-                minHeight: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '2rem',
-            }}
-        >
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
             {/* Hero Section */}
-            <div
-                style={{
-                    textAlign: 'center',
-                    maxWidth: '800px',
-                }}
-            >
-                {/* Logo */}
-                <div
-                    style={{
-                        fontSize: '4rem',
-                        marginBottom: '1rem',
-                    }}
-                >
-                    🤖
+            <header className="relative overflow-hidden">
+                <nav className="max-w-7xl mx-auto px-6 py-6">
+                    <div className="flex justify-between items-center">
+                        <div className="text-2xl font-bold text-white">
+                            <span className="text-emerald-400">ν</span>ous
+                        </div>
+                        <div className="flex items-center gap-6">
+                            <Link href="/auth/login" className="text-gray-300 hover:text-white transition-colors">
+                                Sign in
+                            </Link>
+                            <Link
+                                href="/auth/register"
+                                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+                            >
+                                Get Started
+                            </Link>
+                        </div>
+                    </div>
+                </nav>
+
+                <div className="max-w-7xl mx-auto px-6 py-24 text-center">
+                    <div className="text-sm text-emerald-400 font-medium mb-4 tracking-wider uppercase">
+                        νοῦς — The Cosmic Mind
+                    </div>
+                    <h1 className="text-6xl font-bold text-white mb-6 leading-tight">
+                        The Mind Behind<br />
+                        <span className="text-emerald-400">Your Workflow</span>
+                    </h1>
+                    <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-12">
+                        Enterprise-grade AI Agent Orchestrator with Multi-Agent collaboration,
+                        RAG knowledge bases, and intelligent HR scoring.
+                    </p>
+                    <div className="flex justify-center gap-4">
+                        <Link
+                            href="/auth/register"
+                            className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-lg font-medium rounded-xl transition-colors"
+                        >
+                            Start Building
+                        </Link>
+                        <Link
+                            href="#features"
+                            className="px-8 py-4 bg-gray-700 hover:bg-gray-600 text-white text-lg font-medium rounded-xl transition-colors"
+                        >
+                            Learn More
+                        </Link>
+                    </div>
+
+                    <p className="text-gray-500 mt-8 italic">
+                        &quot;Reason in Motion&quot;
+                    </p>
                 </div>
+            </header>
 
-                {/* Title */}
-                <h1
-                    style={{
-                        fontSize: '3rem',
-                        fontWeight: 700,
-                        background: 'linear-gradient(135deg, #6D5EF7 0%, #A855F7 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        marginBottom: '1rem',
-                    }}
-                >
-                    AgentOps
-                </h1>
+            {/* Features Section */}
+            <section id="features" className="py-24 bg-gray-800/30">
+                <div className="max-w-7xl mx-auto px-6">
+                    <h2 className="text-3xl font-bold text-white text-center mb-4">
+                        Everything You Need
+                    </h2>
+                    <p className="text-gray-400 text-center mb-16 max-w-2xl mx-auto">
+                        Build, deploy, and monitor AI-powered workflows with enterprise-grade reliability.
+                    </p>
 
-                {/* Subtitle */}
-                <p
-                    style={{
-                        fontSize: '1.25rem',
-                        color: 'var(--color-text-secondary)',
-                        marginBottom: '2rem',
-                        lineHeight: 1.6,
-                    }}
-                >
-                    Build, deploy, and manage AI agent workflows at scale.
-                    <br />
-                    Multi-agent orchestration • RAG knowledge base • HR scoring
-                </p>
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {[
+                            {
+                                icon: '🔄',
+                                title: 'Workflow Orchestration',
+                                description:
+                                    'Visual DAG builder with automatic retries, idempotency, and parallel execution.',
+                            },
+                            {
+                                icon: '🧠',
+                                title: 'RAG Knowledge Base',
+                                description:
+                                    'Ingest documents, generate embeddings, and answer questions with citations.',
+                            },
+                            {
+                                icon: '👥',
+                                title: 'HR Scoring',
+                                description:
+                                    'AI-powered candidate evaluation with customizable rubrics and rankings.',
+                            },
+                            {
+                                icon: '🔌',
+                                title: 'Tool Integrations',
+                                description:
+                                    'Connect Slack, Gmail, Sheets, and HTTP webhooks with scoped permissions.',
+                            },
+                            {
+                                icon: '📊',
+                                title: 'Observability',
+                                description:
+                                    'Structured logging, audit trails, and real-time run monitoring.',
+                            },
+                            {
+                                icon: '🔐',
+                                title: 'Enterprise Security',
+                                description:
+                                    'RBAC, encrypted secrets, API keys, and multi-tenant isolation.',
+                            },
+                        ].map((feature) => (
+                            <div
+                                key={feature.title}
+                                className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:border-emerald-500/50 transition-colors"
+                            >
+                                <span className="text-4xl mb-4 block">{feature.icon}</span>
+                                <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
+                                <p className="text-gray-400">{feature.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
-                {/* CTA Buttons */}
-                <div
-                    style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        justifyContent: 'center',
-                        flexWrap: 'wrap',
-                    }}
-                >
+            {/* CTA Section */}
+            <section className="py-24">
+                <div className="max-w-3xl mx-auto px-6 text-center">
+                    <h2 className="text-4xl font-bold text-white mb-6">
+                        Ready to Orchestrate Intelligence?
+                    </h2>
+                    <p className="text-gray-400 text-lg mb-8">
+                        Join teams using Nous to automate complex workflows with AI.
+                    </p>
                     <Link
-                        href="/dashboard"
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.75rem 1.5rem',
-                            backgroundColor: 'var(--color-primary)',
-                            color: '#FFFFFF',
-                            borderRadius: 'var(--radius-md)',
-                            fontWeight: 500,
-                            transition: 'all 200ms ease',
-                        }}
+                        href="/auth/register"
+                        className="inline-block px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-lg font-medium rounded-xl transition-colors"
                     >
-                        Get Started →
-                    </Link>
-                    <Link
-                        href="/docs"
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.75rem 1.5rem',
-                            backgroundColor: 'var(--color-panel)',
-                            color: 'var(--color-text)',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: 'var(--radius-md)',
-                            fontWeight: 500,
-                            transition: 'all 200ms ease',
-                        }}
-                    >
-                        Documentation
+                        Get Started Free
                     </Link>
                 </div>
-            </div>
-
-            {/* Feature Cards */}
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '1.5rem',
-                    maxWidth: '1000px',
-                    width: '100%',
-                    marginTop: '4rem',
-                }}
-            >
-                <FeatureCard
-                    icon="🔄"
-                    title="Workflow Orchestration"
-                    description="Build complex DAG-based workflows with drag-and-drop. Automatic retries, idempotency, and parallel execution."
-                />
-                <FeatureCard
-                    icon="🧠"
-                    title="RAG Knowledge Base"
-                    description="Ingest documents, generate embeddings, and query with citations. Reduce hallucinations with grounded answers."
-                />
-                <FeatureCard
-                    icon="👥"
-                    title="HR Scoring"
-                    description="Score candidates automatically with customizable rubrics. Explainable AI with evidence-backed assessments."
-                />
-            </div>
+            </section>
 
             {/* Footer */}
-            <footer
-                style={{
-                    marginTop: '4rem',
-                    color: 'var(--color-text-muted)',
-                    fontSize: '0.875rem',
-                }}
-            >
-                Built with Next.js, NestJS, and PostgreSQL
+            <footer className="border-t border-gray-800 py-12">
+                <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+                    <div className="text-xl font-bold text-white">
+                        <span className="text-emerald-400">ν</span>ous
+                    </div>
+                    <p className="text-gray-500 text-sm">
+                        © 2024 Nous. Built with ❤️ for enterprise AI orchestration.
+                    </p>
+                </div>
             </footer>
-        </main>
-    );
-}
-
-function FeatureCard({
-    icon,
-    title,
-    description,
-}: {
-    icon: string;
-    title: string;
-    description: string;
-}) {
-    return (
-        <div
-            style={{
-                backgroundColor: 'var(--color-panel)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '1.5rem',
-                transition: 'all 200ms ease',
-            }}
-        >
-            <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{icon}</div>
-            <h3
-                style={{
-                    fontSize: '1.125rem',
-                    fontWeight: 600,
-                    marginBottom: '0.5rem',
-                }}
-            >
-                {title}
-            </h3>
-            <p
-                style={{
-                    color: 'var(--color-text-secondary)',
-                    fontSize: '0.875rem',
-                    lineHeight: 1.6,
-                }}
-            >
-                {description}
-            </p>
         </div>
     );
 }

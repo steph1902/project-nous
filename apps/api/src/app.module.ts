@@ -6,6 +6,8 @@ import { WorkflowCatalogModule } from './modules/workflow-catalog/workflow-catal
 import { RunOrchestrationModule } from './modules/run-orchestration/run-orchestration.module';
 import { KnowledgeBaseModule } from './modules/knowledge-base/knowledge-base.module';
 import { HrScoringModule } from './modules/hr-scoring/hr-scoring.module';
+import { ToolIntegrationsModule } from './modules/tool-integrations/tool-integrations.module';
+import { ObservabilityModule } from './modules/observability/observability.module';
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
 
 @Module({
@@ -26,6 +28,8 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module';
         RunOrchestrationModule,
         KnowledgeBaseModule,
         HrScoringModule,
+        ToolIntegrationsModule,
+        ObservabilityModule,
     ],
 })
 export class AppModule { }
