@@ -14,14 +14,10 @@
 # Next.js
 /.next/
 /out/
-.next
-out
 next-env.d.ts
 
 # Nest.js compiled output
-/dist
 dist/
-/build
 build/
 *.js.map
 
