@@ -1,63 +1,50 @@
-import { Worker } from 'bullmq';
-import IORedis from 'ioredis';
-import { runProcessor } from './queues/runs.processor';
-import { kbIngestProcessor } from './queues/kb-ingest.processor';
-
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+/**
+ * Nous Workers - Background Job Processors
+ *
+ * This service runs BullMQ workers that process:
+ * - Workflow run execution
+ * - Knowledge base document ingestion
+ * - HR candidate scoring
+ */
+import { startRunExecutorWorker } from './run-executor.worker';
+import { startKbIngestionWorker } from './kb-ingestion.worker';
+import { startHrScoringWorker } from './hr-scoring.worker';
 
 async function main() {
-    console.log('🧠 Starting Nous Workers...');
+    console.log('╔════════════════════════════════════════════╗');
+    console.log('║           Nous Workers v0.1.0              ║');
+    console.log('║     Background Job Processing Service      ║');
+    console.log('╚════════════════════════════════════════════╝');
 
-    const connection = new IORedis(REDIS_URL, {
-        maxRetriesPerRequest: null,
-    });
+    // Start all workers
+    const runWorker = startRunExecutorWorker();
+    const kbWorker = startKbIngestionWorker();
+    const hrWorker = startHrScoringWorker();
 
-    // Run Executor Worker
-    const runWorker = new Worker('runs', runProcessor, {
-        connection,
-        concurrency: 5,
-    });
-
-    runWorker.on('completed', (job) => {
-        console.log(`✅ Run completed: ${job.id}`);
-    });
-
-    runWorker.on('failed', (job, err) => {
-        console.error(`❌ Run failed: ${job?.id}`, err.message);
-    });
-
-    // KB Ingestion Worker
-    const kbWorker = new Worker('kb_ingest', kbIngestProcessor, {
-        connection,
-        concurrency: 2,
-    });
-
-    kbWorker.on('completed', (job) => {
-        console.log(`✅ KB ingestion completed: ${job.id}`);
-    });
-
-    kbWorker.on('failed', (job, err) => {
-        console.error(`❌ KB ingestion failed: ${job?.id}`, err.message);
-    });
-
-    console.log('👷 Workers running:');
-    console.log('  - runs (concurrency: 5)');
-    console.log('  - kb_ingest (concurrency: 2)');
+    console.log('\n[Workers] All workers started successfully\n');
 
     // Graceful shutdown
     const shutdown = async () => {
-        console.log('🛑 Shutting down workers...');
-        await runWorker.close();
-        await kbWorker.close();
-        await connection.quit();
+        console.log('\n[Workers] Shutting down...');
+
+        await Promise.all([
+            runWorker.close(),
+            kbWorker.close(),
+            hrWorker.close(),
+        ]);
+
+        console.log('[Workers] All workers stopped');
         process.exit(0);
     };
 
     process.on('SIGTERM', shutdown);
     process.on('SIGINT', shutdown);
+
+    // Keep process running
+    await new Promise(() => { });
 }
 
 main().catch((err) => {
-    console.error('Failed to start workers:', err);
+    console.error('[Workers] Fatal error:', err);
     process.exit(1);
 });

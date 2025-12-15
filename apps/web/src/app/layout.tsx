@@ -1,20 +1,12 @@
-import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
+import { AuthProvider } from '@/hooks/use-auth';
 
-const inter = Inter({
-    subsets: ['latin'],
-    variable: '--font-sans',
-});
+const inter = Inter({ subsets: ['latin'] });
 
-const jetbrainsMono = JetBrains_Mono({
-    subsets: ['latin'],
-    variable: '--font-mono',
-});
-
-export const metadata: Metadata = {
-    title: 'AgentOps - AI Workflow Orchestrator',
-    description: 'Build, deploy, and manage AI agent workflows at scale',
+export const metadata = {
+    title: 'Nous - AI Workflow Orchestrator',
+    description: 'Enterprise-grade AI Agent Workflow Orchestrator',
 };
 
 export default function RootLayout({
@@ -23,8 +15,12 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-            <body>{children}</body>
+        <html lang="en">
+            <body className={inter.className}>
+                <AuthProvider>
+                    {children}
+                </AuthProvider>
+            </body>
         </html>
     );
 }

@@ -2,8 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function RegisterPage() {
+    const router = useRouter();
+    const { register } = useAuth();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -16,18 +20,8 @@ export default function RegisterPage() {
         setError('');
 
         try {
-            const res = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.message || 'Registration failed');
-            }
-
-            window.location.href = '/dashboard';
+            await register(name, email, password);
+            router.push('/dashboard');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Registration failed');
         } finally {

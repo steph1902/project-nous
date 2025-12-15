@@ -2,8 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function LoginPage() {
+    const router = useRouter();
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -15,18 +19,8 @@ export default function LoginPage() {
         setError('');
 
         try {
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.message || 'Login failed');
-            }
-
-            window.location.href = '/dashboard';
+            await login(email, password);
+            router.push('/dashboard');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed');
         } finally {
@@ -64,7 +58,7 @@ export default function LoginPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                placeholder="you@example.com"
+                                placeholder="demo@nous.ai"
                                 required
                             />
                         </div>
@@ -92,6 +86,10 @@ export default function LoginPage() {
                     >
                         {loading ? 'Signing in...' : 'Sign in'}
                     </button>
+
+                    <div className="mt-4 p-3 bg-gray-700/30 rounded-lg text-sm text-gray-400">
+                        <strong>Demo:</strong> demo@nous.ai / demo1234
+                    </div>
 
                     <p className="mt-4 text-center text-sm text-gray-400">
                         Don&apos;t have an account?{' '}
